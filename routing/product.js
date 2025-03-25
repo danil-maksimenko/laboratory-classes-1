@@ -1,10 +1,19 @@
 // 📦 Zaimportuj moduły 'fs' oraz 'STATUS_CODE' do obsługi produktów.
-// 📦 Импортируйте модули 'fs' и 'STATUS_CODE' для работы с продуктами.
+
+// 🏗 Stwórz funkcję 'productRouting', która obsłuży żądania dotyczące produktów.
+
+// 🏗 Stwórz funkcję 'renderAddProductPage', która wyrenderuje stronę dodawania produktu.
+
+// 🏗 Stwórz funkcję 'renderNewProductPage', która wyświetli najnowszy produkt z pliku 'product.txt'.
+// Podpowiedź: fileSystem.readFile(...);
+
+// 🏗 Stwóz funkcję 'addNewProduct', która obsłuży dodawanie nowego produktu, zapisywanie go do pliku 'product.txt' oraz przeniesie użytkownika na stronę '/product/new'.
+// Podpowiedź: fileSystem.writeFile(...);
+// Podpowiedź: response.setHeader("Location", "/product/new");
+
 const fs = require("fs");
 const { STATUS_CODE } = require("../constants/statusCode");
 
-// 🏗 Stwórz funkcję 'productRouting', która obsłuży żądania dotyczące produktów.
-// 🏗 Создайте функцию 'productRouting' для обработки запросов на товары.
 const productRouting = (request, response) => {
   if (request.url === "/product/add" && request.method === "GET") {
     renderAddProductPage(response);
@@ -18,19 +27,53 @@ const productRouting = (request, response) => {
   }
 };
 
-// 🏗 Stwórz funkcję 'renderAddProductPage', która wyrenderuje stronę dodawania produktu.
-// 🏗 Создайте функцию 'renderAddProductPage', которая отображает страницу добавления продукта.
 const renderAddProductPage = (response) => {
   response.setHeader("Content-Type", "text/html");
-  response.end(
-    '<form action="/product/add" method="POST"><input type="text" name="productName"><button type="submit">Add Product</button></form>'
-  );
+  response.end(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Add Product</title>
+      <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        nav { 
+          background-color: #f0f0f0; 
+          padding: 10px; 
+          margin-bottom: 20px; 
+        }
+        nav a { 
+          margin-right: 10px; 
+          text-decoration: none; 
+          color: #333; 
+          padding: 5px 10px; 
+          gap: 10px; 
+        }
+        nav a:hover { 
+          color: white; 
+          background-color: #404040; 
+          border-radius: 3px; 
+        }
+        form { background-color: #f9f9f9; padding: 20px; border-radius: 5px; }
+        input, button { margin: 10px 0; padding: 5px; }
+      </style>
+    </head>
+    <body>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/product/add">Add Product</a>
+        <a href="/product/new">View Products</a>
+        <a href="/logout">Logout</a>
+      </nav>
+      <h1>Add New Product</h1>
+      <form action="/product/add" method="POST">
+        <input type="text" name="productName" placeholder="Enter product name" required>
+        <button type="submit">Add Product</button>
+      </form>
+    </body>
+    </html>
+  `);
 };
 
-// 🏗 Stwórz funkcję 'renderNewProductPage', która wyświetli najnowszy produkt z pliku 'product.txt'.
-// Podpowiedź: fileSystem.readFile(...);
-// 🏗 Создайте функцию 'renderNewProductPage' для отображения последнего продукта из файла 'product.txt'.
-// Подсказка: fileSystem.readFile(...);
 const renderNewProductPage = (response) => {
   fs.readFile("product.txt", "utf8", (err, data) => {
     if (err) {
@@ -39,16 +82,52 @@ const renderNewProductPage = (response) => {
       return;
     }
     response.setHeader("Content-Type", "text/html");
-    response.end(`<h1>New Product: ${data}</h1>`);
+    response.end(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>View Products</title>
+        <style>
+          body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        nav { 
+          background-color: #f0f0f0; 
+          padding: 10px; 
+          margin-bottom: 20px; 
+        }
+        nav a { 
+          margin-right: 10px; 
+          text-decoration: none; 
+          color: #333; 
+          padding: 5px 10px; 
+          gap: 10px; 
+        }
+        nav a:hover { 
+          color: white; 
+          background-color: #404040; 
+          border-radius: 3px; 
+        }
+          .product-box { background-color: #f9f9f9; padding: 20px; border-radius: 5px; }
+        </style>
+      </head>
+      <body>
+        <nav>
+          <a href="/">Home</a>
+          <a href="/product/add">Add Product</a>
+          <a href="/product/new">View Products</a>
+          <a href="/logout">Logout</a>
+        </nav>
+        <h1>Latest Product</h1>
+        <div class="product-box">
+          <h2>New Product: ${data}</h2>
+          <p>This is the most recently added product.</p>
+        </div>
+        <p><a href="/product/add">Add Another Product</a></p>
+      </body>
+      </html>
+    `);
   });
 };
 
-// 🏗 Stwóz funkcję 'addNewProduct', która obsłuży dodawanie nowego produktu, zapisywanie go do pliku 'product.txt' oraz przeniesie użytkownika na stronę '/product/new'.
-// Podpowiedź: fileSystem.writeFile(...);
-// Podpowiedź: response.setHeader("Location", "/product/new");
-// 🏗 Создайте функцию 'addNewProduct' для добавления нового продукта, сохранения его в файл 'product.txt' и перехода пользователя на страницу '/product/new'.
-// Подсказка: fileSystem.writeFile(...);
-// Подсказка: response.setHeader('Location', '/product/new');
 const addNewProduct = (request, response) => {
   let body = "";
   request.on("data", (chunk) => {
@@ -70,5 +149,4 @@ const addNewProduct = (request, response) => {
 };
 
 // 🔧 Wyeksportuj funkcję 'productRouting', aby inne moduł mogły jej używać.
-// 🔧 Экспортируйте функцию 'productRouting', чтобы другие модули могли ее использовать.
 module.exports = { productRouting };
